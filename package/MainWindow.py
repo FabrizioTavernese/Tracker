@@ -35,15 +35,16 @@ class MainWindow(QWidget):
         button_delete.clicked.connect(self.button_delete_pressed)
         button_view.clicked.connect(self.button_view_pressed)
         
-
         h_layout_button = QHBoxLayout()
         h_layout_button.addWidget(button_add)
         h_layout_button.addWidget(button_edit)
         h_layout_button.addWidget(button_delete)
         h_layout_button.addWidget(button_view)
 
-        layout = QVBoxLayout()
 
+        # Layouts
+
+        layout = QVBoxLayout()
         layout.addLayout(h_layout_label)
         layout.addLayout(h_layout_button)
 
@@ -53,7 +54,7 @@ class MainWindow(QWidget):
     # Slots
 
     def button_add_pressed(self):
-        
+
         if self.line_edit.text().isdigit():
             # the text of the line edit is given
             text = int(self.line_edit.text())
