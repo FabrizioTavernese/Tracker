@@ -14,10 +14,21 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Tracker")
+        self.setFixedSize(300, 145)
         self.data = DataManager()
         self.stack = QStackedWidget()
         self.main_view = QWidget()
         self.delete_view = QWidget()
+        self.edit_view = QWidget()
+
+        self.list_widget = QListWidget()
+        self.list_widget.setMinimumSize(100, 90)
+
+        # Unique and dinamic container
+        self.list_container = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(self.list_widget)
+        self.list_container.setLayout(layout)
 
         self.setup_ui()
         self.refresh_list_widget()
@@ -68,30 +79,50 @@ class MainWindow(QWidget):
         self.setLayout(main_layout)
 
 
-        # Delete view
+
+        ######################## DELETE VIEW ##################################
         
-        self.delete_layout = QVBoxLayout()
-        self.list_widget = QListWidget()    # to store the records as items
-        self.list_widget.setMinimumSize(300, 200)
-        self.delete_layout.addWidget(self.list_widget)
+        self.delete_layout = QHBoxLayout()
 
         # Buttons of the delete view
 
-        button_delete_this = QPushButton("Delete")
-        button_delete_this.clicked.connect(self.button_delete_selected_record)
-        buton_back = QPushButton("Back")
-        buton_back.clicked.connect(self.button_back_pressed)
+        button_delete_selected = QPushButton("Delete")
+        button_delete_selected.clicked.connect(self.button_delete_selected_record)
 
-        button_container = QHBoxLayout()
-        button_container.addWidget(buton_back)
-        button_container.addWidget(button_delete_this)
-        self.delete_layout.addLayout(button_container)
+        button_back_delete = QPushButton("Back")
+        button_back_delete.clicked.connect(self.button_back_pressed)
+
+        button_container_delete = QVBoxLayout()
+        button_container_delete.addWidget(button_back_delete)
+        button_container_delete.addWidget(button_delete_selected)
+
+        self.delete_layout.addLayout(button_container_delete)
 
         # the layout of the delete view is established
         self.delete_view.setLayout(self.delete_layout)
 
         # delete view is added to the stacks
         self.stack.addWidget(self.delete_view)  
+
+        ########################## EDIT VIEW ###################################
+
+        self.edit_layout = QHBoxLayout()
+
+        button_edit_selected = QPushButton("Edit")
+        button_edit_selected.clicked.connect(self.button_edit_pressed)
+
+        button_back_edit = QPushButton("Back")
+        button_back_edit.clicked.connect(self.button_back_pressed)
+
+        button_container_edit = QVBoxLayout()
+
+        button_container_edit.addWidget(button_back_edit)
+        button_container_edit.addWidget(button_edit_selected)
+
+        self.edit_layout.addLayout(button_container_edit)
+        self.edit_view.setLayout(self.edit_layout)
+        self.stack.addWidget(self.edit_view)
+
 
     # METHODS
 
@@ -116,9 +147,8 @@ class MainWindow(QWidget):
 
 
     def button_delete_pressed(self):
-        # Changes the curren widget (main_view) to the delete_view
+        self.delete_layout.insertWidget(0, self.list_container)
         self.stack.setCurrentWidget(self.delete_view)
-
 
     def button_delete_selected_record(self):
         # 1. Gets all selected items from the visual list
@@ -146,13 +176,20 @@ class MainWindow(QWidget):
                     self.list_widget.takeItem(self.list_widget.row(item))
                     break   #8. Ends the loop for this item 
 
-    def button_back_pressed(self):
-        self.stack.setCurrentWidget(self.main_view)
+    def button_edit_pressed(self):
+        self.edit_layout.insertWidget(0, self.list_container)
+        self.stack.setCurrentWidget(self.edit_view)
 
     def button_view_pressed(self):
         records = self.data.get_all()
         print("All the records: ")
         show_list(records)
 
-    def button_edit_pressed(self):
-        self.data.edit()
+    def button_back_pressed(self):
+        self.clear_list_container()  # Clears before change the view
+        self.stack.setCurrentWidget(self.main_view)
+
+    def clear_list_container(self):
+        if self.list_container.parent():
+            old_layout = self.list_container.parent().layout()
+            old_layout.removeWidget(self.list_container)
